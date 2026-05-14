@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Последние отзывы — Отзывы на музыку{% endblock %}
+
+{% block content %}
+    <!-- Форма для добавления отзыва -->
+    <section class="add-review">
+        <h2>Добавить отзыв</h2>
+        <form method="POST">
+            <div>
+                <label for="artist">Исполнитель:</label>
+                <input type="text" id="artist" name="artist" required>
+            </div>
+            <div>
+                <label for="track">Трек/Альбом:</label>
+                <input type="text" id="track" name="track" required>
+            </div>
+            <div>
+                <label for="rating">Оценка (1–5):</label>
+                <select id="rating" name="rating" required>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </div>
+            <div>
+                <label for="comment">Отзыв:</label>
+                <textarea id="comment" name="comment" rows="4" required></textarea>
+            </div>
+            <button type="submit">Отправить отзыв</button>
+        </form>
+    </section>
+
+    <!-- Список отзывов -->
+    <section class="reviews">
+        <h2>Последние отзывы</h2>
+        <div id="reviewsList">
+            {% if reviews %}
+                {% for review in reviews %}
+                    <div class="review-item">
+                        <h3>{{ review.artist }} — {{review.track}}</h3>
+                        <p class="rating">Оценка: {{review.rating}}/5</p>
+                        <p>{{ review.comment }}</p>
+                        <small>Опубликовано: {{review.date}}</small>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>Пока нет ни одного отзыва. Будьте первым!</p>
+            {% endif %}
+        </div>
+    </section>
+{% endblock %}

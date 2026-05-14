@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="text-center mb-4">Бронирование отелей для животных</h1>
+        <p class="text-center text-muted">Найдите идеальный отель для вашего питомца</p>
+    </div>
+</div>
+
+<!-- Форма поиска -->
+<div class="card mb-5">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="location" class="form-label">Город</label>
+                <input type="text" class="form-control" id="location" placeholder="Москва, СПб...">
+            </div>
+            <div class="col-md-3">
+                <label for="pet-type" class="form-label">Тип животного</label>
+                <select class="form-select" id="pet-type">
+                    <option selected>Выберите...</option>
+            <option>Собака</option>
+            <option>Кошка</option>
+            <option>Грызун</option>
+            <option>Птица</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="dates" class="form-label">Даты проживания</label>
+                <input type="date" class="form-control" id="dates">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100 mt-4">Найти</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Список отелей -->
+<h2 class="mb-4">Популярные отели</h2>
+<div class="row">
+    {% for hotel in hotels %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ hotel.name }}</h5>
+                <p class="card-text text-muted">{{ hotel.location }}</p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-success">{{ hotel.rating }} ★</span>
+            <span class="fw-bold">{{ hotel.price }} руб/сутки</span>
+                </div>
+                <form method="POST" action="{{ url_for('book') }}">
+                    <input type="hidden" name="hotel_id" value="{{ hotel.id }}">
+            <input type="hidden" name="hotel_name" value="{{ hotel.name }}">
+            <div class="mb-2">
+                <label class="form-label">Имя питомца</label>
+                <input type="text" name="pet_name" class="form-control" required>
+            </div>
+            <div class="mb-2">
+                <label class="form-label">Дата заезда</label>
+                <input type="date" name="check_in" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Дата выезда</label>
+                <input type="date" name="check_out" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success w-100">Забронировать</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
