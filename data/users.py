@@ -2,6 +2,7 @@ import datetime
 import sqlalchemy
 from sqlalchemy.orm import relationship
 
+from forms.user import RegisterForm
 from .db_session import SqlAlchemyBase
 from flask_wtf import FlaskForm
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -35,3 +36,8 @@ class User(SqlAlchemyBase):
     def __repr__(self):
         return f'<User {self.id}, name={self.name}, about={self.about}, email={self.email}>'
 
+    def set_password(self, password):
+        self.hashed_password = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.hashed_password, password)

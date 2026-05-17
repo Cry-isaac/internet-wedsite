@@ -12,7 +12,7 @@
 <div class="card mb-5">
     <div class="card-body">
         <form method="GET" class="row g-3">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <label for="location" class="form-label">Город</label>
                 <input type="text" class="form-control" id="location" placeholder="Москва, СПб...">
             </div>
@@ -27,8 +27,12 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label for="dates" class="form-label">Даты проживания</label>
-                <input type="date" class="form-control" id="dates">
+                <label for="date_in" class="form-label">Дата заезда</label>
+                <input type="date" class="form-control" id="date_in">
+            </div>
+            <div class="col-md-3">
+                <label for="date_out" class="form-label">Дата выезда</label>
+                <input type="date" class="form-control" id="date_out">
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100 mt-4">Найти</button>
@@ -44,13 +48,13 @@
     <div class="col-md-4 mb-4">
         <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">{{ hotel.name }}</h5>
+                <h5 class="card-title">{{ hotel.title }}</h5>
                 <p class="card-text text-muted">{{ hotel.location }}</p>
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <span class="badge bg-success">{{ hotel.rating }} ★</span>
+                    <span class="badge bg-success">{{ hotel.stars }} ★</span>
             <span class="fw-bold">{{ hotel.price }} руб/сутки</span>
                 </div>
-                <form method="POST" action="{{ url_for('book') }}">
+                <form method="POST" action="{{ url_for('index') }}">
                     <input type="hidden" name="hotel_id" value="{{ hotel.id }}">
             <input type="hidden" name="hotel_name" value="{{ hotel.name }}">
             <div class="mb-2">

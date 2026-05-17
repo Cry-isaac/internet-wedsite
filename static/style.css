@@ -133,6 +133,140 @@ p.text-muted {
     margin-bottom: 1rem;
 }
 
+/* Карточка отеля */
+.hotel-card {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+}
+
+.hotel-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hotel-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.hotel-info {
+  padding: 16px;
+}
+
+.hotel-name {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.hotel-location {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+}
+
+.hotel-rating {
+  color: #e74c3c;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.hotel-price {
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #2c3e50;
+  margin: 12px 0;
+}
+
+.book-btn {
+  width: 100%;
+  padding: 12px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.book-btn:hover {
+  background: #2980b9;
+}
+
+/* Для варианта 2 */
+.hotel-features span {
+  margin-right: 10px;
+  font-size: 0.9rem;
+  color: #7f8c8d;
+}
+
+.hotel-old-price {
+  text-decoration: line-through;
+  color: #95a5a6;
+  font-size: 0.9rem;
+}
+
+/* Для варианта 3 */
+.image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.hotel-image-container:hover .image-overlay {
+  opacity: 1;
+}
+
+.view-gallery-btn {
+  background: white;
+  color: #333;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.hotel-amenities {
+  list-style: none;
+  margin: 12px 0;
+}
+
+.hotel-amenities li {
+  margin-bottom: 6px;
+  color: #7f8c8d;
+  font-size: 0.9rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-book {
+  flex: 1;
+  background: #27ae60;
+}
+
+.btn-save {
+  flex: 1;
+  background: #ecf0f1;
+  color: #333;
+}
+
 /* Подвал */
 footer {
     background-color: #2c3e50;
@@ -173,3 +307,4 @@ footer p {
         margin-top: 0.5rem;
     }
 }
+
