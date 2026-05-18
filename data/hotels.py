@@ -13,12 +13,13 @@ class Hotel(SqlAlchemyBase, UserMixin, SerializerMixin):
     #Столбцы
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
-    title = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    title = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    location = sqlalchemy.Column(sqlalchemy.String)
+    city = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    location = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     stars = sqlalchemy.Column(sqlalchemy.Integer, default=0)
-    price = sqlalchemy.Column(sqlalchemy.Integer)
-    user_id = sqlalchemy.Column(sqlalchemy.Integer, ForeignKey('users.id'))
+    price = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    user_id = sqlalchemy.Column(sqlalchemy.Integer, ForeignKey('users.id'), nullable=False)
     reservations_id = sqlalchemy.Column(sqlalchemy.Integer, ForeignKey('reservations.id'), nullable=True)
 
     #Отношения

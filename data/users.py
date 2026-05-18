@@ -1,5 +1,6 @@
 import datetime
 import sqlalchemy
+from flask_login import UserMixin
 from sqlalchemy.orm import relationship
 
 from forms.user import RegisterForm
@@ -12,7 +13,7 @@ from sqlalchemy import ForeignKey
 
 
 #Таблица пользователя
-class User(SqlAlchemyBase):
+class User(SqlAlchemyBase, UserMixin):
     #Название таблицы
     __tablename__ = 'users'
 

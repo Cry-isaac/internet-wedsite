@@ -17,14 +17,25 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
+                {% if current_user.is_authenticated %}
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('index') }}">Главная</a>
+                        <a class="navbar-brand" href="{{ url_for('profile') }}">{{ current_user.name }}</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="navbar-brand" href="/logout">Выйти</a>
+                    </li>
+                </ul>
+                {% else %}
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('register') }}">Регистрация</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">Войти</a>
+                    </li>
                 </ul>
+                {% endif %}
             </div>
         </div>
     </nav>
