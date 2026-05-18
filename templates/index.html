@@ -13,26 +13,16 @@
     <div class="card-body">
         <form method="GET" class="row g-3">
             <div class="col-md-3">
-                <label for="location" class="form-label">Город</label>
-                <input type="text" class="form-control" id="location" placeholder="Москва, СПб...">
+                <label for="city" class="form-label">Город</label>
+                <input type="text" class="form-control" id="city" placeholder="Москва, СПб...">
             </div>
             <div class="col-md-3">
-                <label for="pet-type" class="form-label">Тип животного</label>
-                <select class="form-select" id="pet-type">
-                    <option selected>Выберите...</option>
-            <option>Собака</option>
-            <option>Кошка</option>
-            <option>Грызун</option>
-            <option>Птица</option>
-                </select>
+                <label for="check_in" class="form-label">Дата заезда</label>
+                <input type="date" class="form-control" id="check_in">
             </div>
             <div class="col-md-3">
-                <label for="date_in" class="form-label">Дата заезда</label>
-                <input type="date" class="form-control" id="date_in">
-            </div>
-            <div class="col-md-3">
-                <label for="date_out" class="form-label">Дата выезда</label>
-                <input type="date" class="form-control" id="date_out">
+                <label for="check_out" class="form-label">Дата выезда</label>
+                <input type="date" class="form-control" id="check_out">
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-primary w-100 mt-4">Найти</button>

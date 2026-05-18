@@ -1,5 +1,5 @@
-from flask import Flask, render_template, redirect, jsonify, request
-from flask_restful import Api
+from flask import Flask, render_template, redirect, request
+from flask_restful import Api, abort
 from sqlalchemy import desc
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 
@@ -33,19 +33,18 @@ def main():
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
+        search_query = request.form.get('city', '')
         db_sess = db_session.create_session()
         try:
             # Обработка POST‑запроса
-            if request.method == 'POST':
+            if search_query:
                 # Получаем данные из формы
-                location = request.form.get('location', '')
+                city = request.form.get('city')
                 check_in = request.form.get('check_in')
                 check_out = request.form.get('check_out')
 
                 # Фильтруем отели по параметрам
-                hotels = db_sess.query(Hotel).filter(
-                    Hotel.location.contains(location)
-                ).all()
+                hotels = db_sess.query(Hotel).filter(city == Hotel.city).all()
             else:
                 # Для GET‑запроса показываем все отели
                 hotels = db_sess.query(Hotel).order_by(desc(Hotel.stars)).all()
@@ -125,6 +124,59 @@ def main():
             return redirect('/profile')
         return render_template('add_hotel.html', form=form)
 
+    @app.route('/hotel/<int:id>', methods=['GET', 'POST'])
+    @login_required
+    def edit_hotel(id):
+        form = HotelForm()
+        if request.method == "GET":
+            db_sess = db_session.create_session()
+            hotel = db_sess.query(Hotel).filter(Hotel.id == id,
+                                              Hotel.user_id == current_user.id
+                                              ).first()
+            if hotel:
+                form.title.data = hotel.title
+                form.city.data = hotel.city
+                form.location.data = hotel.location
+                form.price.data = hotel.price
+                form.stars.data = hotel.stars
+                form.description.data = hotel.description
+            else:
+                abort(404)
+        if form.validate_on_submit():
+            db_sess = db_session.create_session()
+            hotel = db_sess.query(Hotel).filter(Hotel.id == id,
+                                              Hotel.user_id == current_user.id
+                                              ).first()
+            if hotel:
+                hotel.title = form.title.data
+                hotel.city = form.city.data
+                hotel.location = form.location.data
+                hotel.price = form.price.data
+                hotel.stars = form.stars.data
+                hotel.description = form.description.data
+                hotel.user_id = current_user.id
+                db_sess.commit()
+                return redirect('/profile')
+            else:
+                abort(404)
+        return render_template('hotel.html',
+                               title='Редактирование отеля',
+                               form=form
+                               )
+
+    @app.route('/hotel_delete/<int:id>', methods=['GET', 'POST'])
+    @login_required
+    def hotel_delete(id):
+        db_sess = db_session.create_session()
+        hotel = db_sess.query(Hotel).filter(Hotel.id == id,
+                                          Hotel.user_id == current_user.id
+                                          ).first()
+        if hotel:
+            db_sess.delete(hotel)
+            db_sess.commit()
+        else:
+            abort(404)
+        return redirect('/profile')
 
     @app.route('/logout')
     @login_required
