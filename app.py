@@ -1,4 +1,6 @@
-from flask import Flask, render_template, redirect, request
+from datetime import datetime
+
+from flask import Flask, render_template, redirect, request, flash
 from flask_restful import Api, abort
 from sqlalchemy import desc
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -16,13 +18,29 @@ api = Api(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 
 
 def main():
-    #Подключение к бд
+    # Подключение к бд
     db_session.global_init("db/blogs.db")
+
+    def calculate_nights(check_in_str, check_out_str):
+
+        #Вычисляет количество ночей между датами заезда и выезда.
+
+        check_in = datetime.strptime(check_in_str, '%d-%m-%Y')
+        check_out = datetime.strptime(check_out_str, '%d-%m-%Y')
+
+        # Разница в днях
+        nights = (check_out - check_in).days
+
+        if nights < 0:
+            raise ValueError("Дата выезда не может быть раньше даты заезда")
+        if nights == 0:
+            raise ValueError("Минимальное бронирование — 1 ночь")
+
+        return nights
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -33,25 +51,69 @@ def main():
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
-        search_query = request.form.get('city', '')
         db_sess = db_session.create_session()
+        city = ''  # По умолчанию
+        error = ''
+
         try:
-            # Обработка POST‑запроса
-            if search_query:
-                # Получаем данные из формы
-                city = request.form.get('city')
-                check_in = request.form.get('check_in')
-                check_out = request.form.get('check_out')
+            if request.method == 'POST':
+                form_type = request.form.get('form_type')
+                # Получается город
+                if form_type == "booking":
+                    if not current_user or not current_user.is_authenticated:
+                        error = 'Для бронирования необходимо войти в аккаунт'
+                    else:
+                        reservation = BookedDate()
+                        user = db_sess.get(User, current_user.id)
+                        hotel_id = request.form.get('hotel_id')
+                        check_in = request.form.get('check_in')
+                        check_out = request.form.get('check_out')
+                        hotel = db_sess.get(Hotel, hotel_id)
+                        nights = calculate_nights(check_in, check_out)
 
-                # Фильтруем отели по параметрам
-                hotels = db_sess.query(Hotel).filter(city == Hotel.city).all()
+                        reservation.hotel_id = hotel_id
+                        reservation.user_id = user.id
+                        reservation.pet_name = request.form.get('pet_name')
+                        reservation.check_in = check_in
+                        reservation.check_out = check_out
+                        reservation.total_price = nights * hotel.price
+
+                        user.booked_date.append(reservation)
+                        db_sess.merge(current_user)
+
+                        db_sess.commit()
+                        return redirect('/')
+
+                elif form_type == 'search' or 'search' in request.form:
+                    city = request.form.get('city', '').strip()
+
+                    # Строим запрос с фильтрацией, если город указан
+                    if city:
+                        hotels = db_sess.query(Hotel).filter(Hotel.city.ilike(f'%{city}%')).order_by(desc(Hotel.stars)).all()
+                    else:
+                        # Если город не указан, показываем все отели
+                        hotels = db_sess.query(Hotel).order_by(desc(Hotel.stars)).all()
+                else:  # GET‑запрос. Показываются все отели
+                    hotels = db_sess.query(Hotel).order_by(desc(Hotel.stars)).all()
             else:
-                # Для GET‑запроса показываем все отели
                 hotels = db_sess.query(Hotel).order_by(desc(Hotel.stars)).all()
+            return render_template(
+                'index.html',
+                hotels=hotels,
+                city=city,
+                error=error
+            )
 
-            return render_template('index.html', hotels=hotels)
+
+        except Exception:
+            # Показывается сообщение об ошибке в шаблоне
+            return render_template(
+                'index.html',
+                hotels=[],
+                city=city,
+                error="Произошла ошибка при загрузке данных"
+            )
         finally:
-            # Обязательно закрываем сессию БД
             db_sess.close()
 
     # Регистрация
@@ -97,7 +159,7 @@ def main():
     def profile():
         user = load_user(current_user.id)
         db_sess = db_session.create_session()
-        hotels = db_sess.query(Hotel).filter(Hotel.user_id == user.id).all()
+        hotels = db_sess.query(Hotel).filter(Hotel.owner_id == user.id).all()
         booked_date = db_sess.query(BookedDate).filter(BookedDate.user_id == user.id).all()
         db_sess.close()
         return render_template('profile.html', user=user, user_hotels=hotels, user_booking=booked_date)
@@ -114,11 +176,11 @@ def main():
             hotel.title = form.title.data
             hotel.city = form.city.data
             hotel.location = form.location.data
-            hotel.price= form.price.data
+            hotel.price = form.price.data
             hotel.stars = form.stars.data
             hotel.description = form.description.data
             hotel.user_id = current_user.id
-            user.hotel.append(hotel)
+            user.hotels.append(hotel)
             db_sess.merge(current_user)
             db_sess.commit()
             return redirect('/profile')
@@ -131,8 +193,8 @@ def main():
         if request.method == "GET":
             db_sess = db_session.create_session()
             hotel = db_sess.query(Hotel).filter(Hotel.id == id,
-                                              Hotel.user_id == current_user.id
-                                              ).first()
+                                                Hotel.owner_id == current_user.id
+                                                ).first()
             if hotel:
                 form.title.data = hotel.title
                 form.city.data = hotel.city
@@ -145,8 +207,8 @@ def main():
         if form.validate_on_submit():
             db_sess = db_session.create_session()
             hotel = db_sess.query(Hotel).filter(Hotel.id == id,
-                                              Hotel.user_id == current_user.id
-                                              ).first()
+                                                Hotel.owner_id == current_user.id
+                                                ).first()
             if hotel:
                 hotel.title = form.title.data
                 hotel.city = form.city.data
@@ -169,8 +231,8 @@ def main():
     def hotel_delete(id):
         db_sess = db_session.create_session()
         hotel = db_sess.query(Hotel).filter(Hotel.id == id,
-                                          Hotel.user_id == current_user.id
-                                          ).first()
+                                            Hotel.owner_id == current_user.id
+                                            ).first()
         if hotel:
             db_sess.delete(hotel)
             db_sess.commit()
