@@ -29,8 +29,8 @@ def main():
 
         #Вычисляет количество ночей между датами заезда и выезда.
 
-        check_in = datetime.strptime(check_in_str, '%d-%m-%Y')
-        check_out = datetime.strptime(check_out_str, '%d-%m-%Y')
+        check_in = datetime.strptime(check_in_str, '%Y-%m-%d')
+        check_out = datetime.strptime(check_out_str, '%Y-%m-%d')
 
         # Разница в днях
         nights = (check_out - check_in).days
@@ -59,32 +59,7 @@ def main():
             if request.method == 'POST':
                 form_type = request.form.get('form_type')
                 # Получается город
-                if form_type == "booking":
-                    if not current_user or not current_user.is_authenticated:
-                        error = 'Для бронирования необходимо войти в аккаунт'
-                    else:
-                        reservation = BookedDate()
-                        user = db_sess.get(User, current_user.id)
-                        hotel_id = request.form.get('hotel_id')
-                        check_in = request.form.get('check_in')
-                        check_out = request.form.get('check_out')
-                        hotel = db_sess.get(Hotel, hotel_id)
-                        nights = calculate_nights(check_in, check_out)
-
-                        reservation.hotel_id = hotel_id
-                        reservation.user_id = user.id
-                        reservation.pet_name = request.form.get('pet_name')
-                        reservation.check_in = check_in
-                        reservation.check_out = check_out
-                        reservation.total_price = nights * hotel.price
-
-                        user.booked_date.append(reservation)
-                        db_sess.merge(current_user)
-
-                        db_sess.commit()
-                        return redirect('/')
-
-                elif form_type == 'search' or 'search' in request.form:
+                if form_type == 'search' or 'search' in request.form:
                     city = request.form.get('city', '').strip()
 
                     # Строим запрос с фильтрацией, если город указан
@@ -115,6 +90,43 @@ def main():
             )
         finally:
             db_sess.close()
+
+    @app.route('/booking', methods=['POST'])
+    def booking():
+        db_sess = db_session.create_session()
+        error = ''
+        hotels = db_sess.query(Hotel).order_by(desc(Hotel.stars)).all()
+        print(hotels[0].id)
+        if not current_user or not current_user.is_authenticated:
+            print('не вошел')
+            error = 'Для бронирования необходимо войти в аккаунт'
+        else:
+            reservation = BookedDate()
+            user = db_sess.get(User, current_user.id)
+            hotel_id = request.form.get('hotel_id')
+            check_in = request.form.get('check_in')
+            check_out = request.form.get('check_out')
+            hotel = db_sess.get(Hotel, hotel_id)
+            nights = calculate_nights(check_in, check_out)
+
+            reservation.hotel_id = hotel_id
+            reservation.user_id = user.id
+            reservation.pet_name = request.form.get('pet_name')
+            reservation.check_in = datetime.strptime(check_in, '%Y-%m-%d')
+            reservation.check_out = datetime.strptime(check_out, '%Y-%m-%d')
+            reservation.total_price = nights * hotel.price
+            print(type(check_out))
+
+            user.reservations.append(reservation)
+            hotel.reservations.append(reservation)
+            db_sess.merge(current_user)
+            db_sess.commit()
+        return render_template(
+                'index.html',
+                hotels=hotels,
+                city='',
+                error=error
+            )
 
     # Регистрация
     @app.route('/register', methods=['GET', 'POST'])

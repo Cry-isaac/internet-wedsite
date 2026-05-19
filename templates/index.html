@@ -84,7 +84,7 @@
 <div class="modal fade" id="bookingModal" tabindex="-1" aria-labelledby="bookingModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" action="{{ url_for('index') }}">
+      <form method="POST" action="{{ url_for('booking') }}" id="reservation">
         <input type="hidden" name="form_type" value="booking">
         <input type="hidden" name="hotel_id" id="modal_hotel_id">
         <input type="hidden" name="hotel_name" id="modal_hotel_name">
